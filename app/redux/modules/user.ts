@@ -1,68 +1,101 @@
+import { SIGN_IN, SIGN_UP } from '../../apollo/queries/UserQueries'
+
+import client from '../../apollo/Client'
+import errorHandler from '../../utils/ErrorHandler'
+
 //Actions
 enum Actions {
-  INCREMENT_COUNTER = 'INCREMENT_COUNTER',
-  DECREMENT_COUNTER = 'DECREMENT_COUNTER'
+  SET_LOGIN_USER = 'SET_LOGIN_USER'
 }
 
-const increment = () => {
+const setLoginUser = (loginUser: any) => {
   return {
-    type: Actions.INCREMENT_COUNTER
-  };
-}
-
-const decrement = () => {
-  return {
-    type: Actions.DECREMENT_COUNTER
-  };
+    type: Actions.SET_LOGIN_USER,
+    loginUser
+  }
 }
 
 //API Actions
-const incrementCounter = () => {
+const signUpRequest = (accountId: string, password: string, cb: any) => {
   return (dispatch: any) => {
-    dispatch(increment())
+    client.mutate({
+      mutation: SIGN_UP,
+      variables: {
+        accountId: accountId,
+        password: password,
+      }
+    })
+      .then((result: any) => {
+        const {data: {signUp: {token, user}}} = result;
+        dispatch(setLoginUser(user))
+        localStorage.setItem(token, token);
+        cb(true, null)
+      })
+      .catch((err: any) => {      
+        cb(false, errorHandler(err))
+      })
   }
 }
 
-const decrementCounter = () => {
+const signInRequest = (accountId: string, password: string, cb: any) => {
   return (dispatch: any) => {
-    dispatch(decrement())
+    client.mutate({
+      mutation: SIGN_IN,
+      variables: {
+        accountId: accountId,
+        password: password
+      }
+    })
+      .then((result: any) => {
+        const {data: {signIn: {token, user}}} = result;
+        dispatch(setLoginUser(user))
+        localStorage.setItem(token, token);
+        cb(true, null)
+      })
+      .catch((err: any) => {
+        cb(false, errorHandler(err))
+      })
   }
 }
+
 
 
 //init state
 const initState = {
-  counter: 0
+  loginUser: {
+    accountId: '',
+    createdAt: '',
+    updatedAt: ''
+  }
 }
 
 // reducer
 const reducer = (state = initState, action) => {
   switch (action.type) {
-      case Actions.INCREMENT_COUNTER:
-          return applyIncrementCounter(state, action);
-      case Actions.DECREMENT_COUNTER:
-          return applyDecrementCounter(state, action);
+      case Actions.SET_LOGIN_USER:
+        return applySetLoginUser(state, action);   
       default : return state;
   }
 }
 
 // reducer func
-const applyIncrementCounter = (state, action) => {
-  return {...state, counter: state.counter + 1};
-}
 
-const applyDecrementCounter = (state, action) => {
-  return {...state, counter: state.counter - 1};
+
+const applySetLoginUser = (state, action) => {
+  const { loginUser } = action;
+  return {
+    ...state, 
+    loginUser: loginUser
+  }
 }
 
 const actionCreators = {
-  incrementCounter,
-  decrementCounter
+  signUpRequest,
+  signInRequest
 } 
 
 const actions = {
-  increment,
-  decrement
+  setLoginUser
 }
 
 export {actionCreators, actions, Actions};

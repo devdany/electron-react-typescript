@@ -1,15 +1,20 @@
 import * as React from 'react';
-import { Switch, Route } from 'react-router';
-const routes = require('./constants/routes.json');
+
+import { Route, Switch } from 'react-router';
+
 import App from './containers/App';
 import HomePage from './containers/HomePage';
-import CounterPage from './containers/CounterPage';
+import SignInPage from './containers/SignInPage';
+import SignUpPage from './containers/SignUpPage';
+
+const routes = require('./constants/routes.json');
 
 export default () => (
   <App>
     <Switch>
-      <Route path={routes.COUNTER} component={CounterPage} />
-      <Route path={routes.HOME} component={HomePage} />
+      <Route path={routes.HOME} exact component={HomePage} />
+      <Route path={routes.SIGN_UP} component={SignUpPage} />
+      <Route path={routes.SIGN_IN} component={SignInPage} />
     </Switch>
   </App>
 );

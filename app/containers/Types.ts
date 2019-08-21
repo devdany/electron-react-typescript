@@ -1,5 +1,9 @@
 interface User{
-  counter: number
+  loginUser: {
+    accountId: string
+    createdAt: string
+    updatedAt: string
+  }
 }
 
 interface UserState {
